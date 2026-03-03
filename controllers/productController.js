@@ -70,7 +70,7 @@ const getAllProducts = async (req, res) => {
 
     const products = await Product.find(query)
       .sort({ createdAt: -1 })
-      .skip(skip)
+      .skip(skip) 
       .limit(Number(limit));
 
     const total = await Product.countDocuments(query);
@@ -94,19 +94,26 @@ const getAllProducts = async (req, res) => {
 // 🔹 GET SINGLE PRODUCT
 // ----------------------------------------------------
 const getProductById = async (req, res) => {
+  console.log("get single product");
+  
   try {
-    const product = await Product.findById(req.params.id);
-
-    if (!product) {
+    const products = await Product.findById(req.params.id);
+  console.log(products);
+  
+    if (!products) {
       return res.status(404).json({
         success: false,
         message: "Product not found",
       });
     }
-
+     let category = products.category
+    const  relatedProducts = await Product.find({category:category}).limit(4)
+    console.log(category);
+    
     res.status(200).json({
       success: true,
-      data: product,
+      product: products,
+      relatedProduct : relatedProducts
     });
   } catch (error) {
     res.status(500).json({
