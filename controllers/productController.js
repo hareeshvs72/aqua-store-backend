@@ -1,51 +1,38 @@
 const Product = require("../models/productModel");
-
+const cloudinary = require("../config/cloudinary")
+require("dotenv").config()
 // ----------------------------------------------------
 // 🔹 CREATE PRODUCT (Admin)
 // ----------------------------------------------------
 const createProduct = async (req, res) => {
-  try {
-    const {
-      name,
-      description,
-      category,
-      waterType,
-      difficulty,
-      price,
-      stock,
-      images,
-      isFeatured,
-    } = req.body;
+  console.log("inside Create Product");
 
-    if (!name || !description || !category || !price) {
-      return res.status(400).json({
-        success: false,
-        message: "Required fields are missing",
+  try {
+
+    const imageUrls = [];
+
+    for (const file of req.files) {
+  console.log(file.path);
+  
+      const result = await cloudinary.uploader.upload(file.path, {
+        folder: "aqua_store_products"
       });
+
+      imageUrls.push(result.secure_url);
     }
 
-    const product = await Product.create({
-      name,
-      description,
-      category,
-      waterType,
-      difficulty,
-      price,
-      stock,
-      images,
-      isFeatured,
+    const product = new Product({
+      ...req.body,
+      images: imageUrls
     });
 
-    res.status(201).json({
-      success: true,
-      message: "Product created successfully",
-      data: product,
-    });
+    await product.save();
+
+    res.status(201).json(product);
+
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    console.log(error);
+    res.status(500).json(error);
   }
 };
 
@@ -180,10 +167,34 @@ const deleteProduct = async (req, res) => {
   }
 };
 
+// --------------------------------------------
+// GET ALL PRODUCTS (ADMIN)
+// --------------------------------------------
+const getAllProductsAdmin = async (req, res) => {
+  try {
+
+    const products = await Product.find().sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      total: products.length,
+      data: products
+    });
+
+  } catch (error) {
+
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+
+  }
+};
 module.exports = {
   createProduct,
   getAllProducts,
   getProductById,
   updateProduct,
   deleteProduct,
+  getAllProductsAdmin
 };
