@@ -17,7 +17,7 @@ router.get("/:id", getProductById);
 
 // Protected (Add admin middleware later)
 router.post("/", ClerkExpressRequireAuth(),upload.array("images"), createProduct);
-router.put("/:id", ClerkExpressRequireAuth(), updateProduct);
+router.put("/:id", ClerkExpressRequireAuth(),upload.array("images"), updateProduct);
 router.delete("/:id", ClerkExpressRequireAuth(), deleteProduct);
 router.get("/admin/products", ClerkExpressRequireAuth(), getAllProductsAdmin);
 module.exports = router;

@@ -114,9 +114,14 @@ const getProductById = async (req, res) => {
 // 🔹 UPDATE PRODUCT (Admin)
 // ----------------------------------------------------
 const updateProduct = async (req, res) => {
+  console.log("inside product update ");
+  const {id} = req.params
+  console.log((id));
+  console.log(req.body);
+  
   try {
     const product = await Product.findByIdAndUpdate(
-      req.params.id,
+     id,
       req.body,
       { new: true, runValidators: true }
     );
@@ -124,7 +129,7 @@ const updateProduct = async (req, res) => {
     if (!product) {
       return res.status(404).json({
         success: false,
-        message: "Product not found",
+        message: "Product not found", 
       });
     }
 
@@ -134,6 +139,8 @@ const updateProduct = async (req, res) => {
       data: product,
     });
   } catch (error) {
+    console.log(error);
+    
     res.status(500).json({
       success: false,
       message: error.message,

@@ -1,27 +1,45 @@
 const express = require("express");
 const dotenv = require("dotenv");
+const { clerkMiddleware } = require("@clerk/express");
+
+dotenv.config();
 const cors = require("cors");
-const orderRoutes = require("./Router/orderRoutes");
+
 const connectDB = require("./Database/dbConnection");
 const userRoutes = require("./Router/userRoutes");
 const productRoutes = require("./Router/productRoutes");
+const orderRoutes = require("./Router/orderRoutes");
+const CartRoutes = require("./Router/CartRoutes");
 
-dotenv.config();
 connectDB();
+
+
+
 const app = express();
 
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use("/api/orders", orderRoutes);
+
+// clockSkewInMs allows up to 60s of clock difference between frontend & backend
+// This fixes the "token-not-active-yet" (nbf) JWT rejection
+app.use(clerkMiddleware({ clockSkewInMs: 60000 }))
+
+// Routes
 app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
-// Connect Database
+app.use("/api/orders", orderRoutes);
+app.use("/api/cart", CartRoutes);
 
+app.use((err, req, res, next) => {
+  console.error("🔥 Clerk Error:", err);
+  res.status(401).json({ error: err.message });
+});
 
 app.get("/", (req, res) => {
   res.send("Backend running 🚀");
 });
+
 
 const PORT = process.env.PORT || 5000;
 

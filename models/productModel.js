@@ -18,6 +18,10 @@ const productSchema = new mongoose.Schema(
       enum: ["Fish", "Plants", "Accessories"],
       required: true,
     },
+    acceType:{
+      type:String,
+        enum: ["Fillters", "Lighting", "Tanks","Food"],
+    },
 
     waterType: {
       type: String,

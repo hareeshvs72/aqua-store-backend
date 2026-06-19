@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { ClerkExpressRequireAuth } = require("@clerk/clerk-sdk-node");
+require("dotenv").config();
 
 const {
   syncUser,
@@ -11,12 +11,12 @@ const {
 } = require("../controllers/userController");
 
 // User routes
-router.get("/sync", ClerkExpressRequireAuth(), syncUser);
-router.get("/me", ClerkExpressRequireAuth(), getCurrentUser);
-router.put("/update", ClerkExpressRequireAuth(), updateUserProfile);
+router.get("/sync", syncUser);
+router.get("/me",  getCurrentUser);
+router.put("/update", updateUserProfile);
 
-// Admin routes (add admin middleware later)
-router.get("/", ClerkExpressRequireAuth(), getAllUsers);
-router.put("/role", ClerkExpressRequireAuth(), updateUserRole);
+// Admin routes
+router.get("/",  getAllUsers);
+router.put("/role", updateUserRole);
 
 module.exports = router;
