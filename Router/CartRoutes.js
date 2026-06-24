@@ -16,9 +16,11 @@ const authMiddleware = ClerkExpressRequireAuth({
 
 const router = express.Router();
 
-router.post("/add", requireAuth(), addToCart);
-router.get("/", requireAuth(), getCart);
-router.delete("/remove", requireAuth, removeFromCart);
-router.put("/update", requireAuth, updateQuantity);
+router.post("/add", addToCart);
+router.get("/", getCart);
+router.delete("/remove", removeFromCart);
+router.put("/update", updateQuantity);
+
+
 
 module.exports = router;
