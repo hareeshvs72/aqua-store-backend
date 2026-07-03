@@ -1,11 +1,16 @@
 const Order = require("../models/Order");
 const Product = require("../models/productModel");
+const stripe = require("../config/stripe");
+const PendingOrder = require("../models/PendingOrder");
+require("dotenv").config();
 
 // --------------------------------------------------
 // 🔹 CREATE ORDER
 // --------------------------------------------------
 const createOrder = async (req, res) => {
   try {
+    console.log("🔹 Incoming Order Payload:", req.body);
+
     const clerkId = req.auth.userId;
     const { items, shippingAddress } = req.body;
 
@@ -16,10 +21,11 @@ const createOrder = async (req, res) => {
       });
     }
 
-    let totalAmount = 0;
+    let subtotal = 0;
+    const lineItems = [];
 
-    // Validate products & calculate total
-    for (let item of items) {
+    // Validate products
+    for (const item of items) {
       const product = await Product.findById(item.product);
 
       if (!product) {
@@ -36,26 +42,120 @@ const createOrder = async (req, res) => {
         });
       }
 
-      totalAmount += product.price * item.quantity;
-
-      // Reduce stock
-      product.stock -= item.quantity;
-      await product.save();
-
       item.price = product.price;
+      subtotal += product.price * item.quantity;
+
+      lineItems.push({
+        price_data: {
+          currency: "inr",
+          product_data: {
+            name: product.name,
+            images:
+              product.images?.length > 0
+                ? [product.images[0]]
+                : [
+                    "https://images.unsplash.com/photo-1610832958506-aa56368176cf",
+                  ],
+          },
+          unit_amount: Math.round(product.price * 100),
+        },
+        quantity: item.quantity,
+      });
     }
 
-    const order = await Order.create({
+    const shipping = subtotal > 2000 ? 0 : 150;
+    const tax = 120;
+    const totalAmount = subtotal + shipping + tax;
+
+    if (shipping > 0) {
+      lineItems.push({
+        price_data: {
+          currency: "inr",
+          product_data: {
+            name: "Shipping Charge",
+          },
+          unit_amount: shipping * 100,
+        },
+        quantity: 1,
+      });
+    }
+
+    if (tax > 0) {
+      lineItems.push({
+        price_data: {
+          currency: "inr",
+          product_data: {
+            name: "Tax",
+          },
+          unit_amount: tax * 100,
+        },
+        quantity: 1,
+      });
+    }
+
+    // Create Pending Order
+    const pendingOrder = await PendingOrder.create({
       clerkId,
       items,
       shippingAddress,
+      subtotal,
+      shipping,
+      tax,
       totalAmount,
     });
 
-    res.status(201).json({
+    const frontendUrl =
+      process.env.FRONTEND_URL || "http://localhost:5173";
+
+    try {
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ["card"],
+        mode: "payment",
+        line_items: lineItems,
+
+        success_url: `${frontendUrl}/orders?payment=success&session_id={CHECKOUT_SESSION_ID}`,
+
+        cancel_url: `${frontendUrl}/cart?payment=cancel`,
+
+        metadata: {
+          pendingOrderId: pendingOrder._id.toString(),
+        },
+      });
+
+      return res.status(201).json({
+        success: true,
+        message: "Checkout session created successfully",
+        url: session.url,
+      });
+    } catch (stripeError) {
+      // Remove Pending Order if Stripe session creation fails
+      await PendingOrder.findByIdAndDelete(pendingOrder._id);
+
+      throw stripeError;
+    }
+  } catch (error) {
+    console.error("Create Order Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// --------------------------------------------------
+// 🔹 GET ALL ORDERS (Admin)
+// --------------------------------------------------
+const getAllOrders = async (req, res) => {
+  try {
+    const orders = await Order.find()
+      .populate("items.product")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
       success: true,
-      message: "Order placed successfully",
-      data: order,
+      total: orders.length,
+      data: orders,
     });
 
   } catch (error) {
@@ -155,6 +255,7 @@ const updateOrderStatus = async (req, res) => {
 
 module.exports = {
   createOrder,
+  getAllOrders,
   getMyOrders,
   getOrderById,
   updateOrderStatus,

@@ -1,7 +1,6 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const { clerkMiddleware } = require("@clerk/express");
-
 dotenv.config();
 const cors = require("cors");
 
@@ -19,6 +18,14 @@ const app = express();
 
 // Middleware
 app.use(cors());
+
+// Stripe Webhook needs the raw body buffer for signature verification
+app.post(
+  "/api/stripe/webhook",
+  express.raw({ type: "application/json" }),
+  require("./controllers/stripeWebhookController")
+);
+
 app.use(express.json());
 
 // clockSkewInMs allows up to 60s of clock difference between frontend & backend

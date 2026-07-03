@@ -1,15 +1,12 @@
 const mongoose = require("mongoose");
 
-const orderSchema = new mongoose.Schema(
+const pendingOrderSchema = new mongoose.Schema(
   {
     clerkId: {
       type: String,
       required: true,
     },
-   paymentIntentId: {
-  type: String,
-  unique: true,
-},
+
     items: [
       {
         product: {
@@ -29,6 +26,8 @@ const orderSchema = new mongoose.Schema(
     ],
 
     shippingAddress: {
+      fullName: String,
+      phone: String,
       address: String,
       city: String,
       state: String,
@@ -36,24 +35,14 @@ const orderSchema = new mongoose.Schema(
       country: String,
     },
 
-    totalAmount: {
-      type: Number,
-      required: true,
-    },
-
-    paymentStatus: {
-      type: String,
-      enum: ["pending", "paid", "failed"],
-      default: "pending",
-    },
-
-    orderStatus: {
-      type: String,
-      enum: ["Pending", "Processing", "Shipped", "Delivered", "Cancelled", "processing", "shipped", "delivered", "cancelled"],
-      default: "Pending",
-    },
+    subtotal: Number,
+    shipping: Number,
+    tax: Number,
+    totalAmount: Number,
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
 
-module.exports = mongoose.model("Order", orderSchema);
+module.exports = mongoose.model("PendingOrder", pendingOrderSchema);
