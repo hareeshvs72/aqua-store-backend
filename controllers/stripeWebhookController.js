@@ -6,7 +6,10 @@ const Cart = require("../models/cartModel");
 const stripe = require("../config/stripe");
 
 const stripeWebhook = async (req, res) => {
+
+ console.log("inside stripeWebhook ")
   const sig = req.headers["stripe-signature"];
+console.log(sig);
 
   let event;
 
@@ -64,7 +67,7 @@ const stripeWebhook = async (req, res) => {
 
         await product.save();
       }
-
+  console.log("Creating Order...");
       // Create Final Order
       const order = await Order.create({
         clerkId: pendingOrder.clerkId,

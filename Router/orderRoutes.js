@@ -32,6 +32,7 @@ const {
   getMyOrders,
   getOrderById,
   updateOrderStatus,
+  verifyPayment,
 } = require("../controllers/orderController");
 
 // User routes
@@ -42,15 +43,17 @@ router.get("/:id", ClerkExpressRequireAuth(), getOrderById);
 // Admin routes
 router.get("/", ClerkExpressRequireAuth(), getAllOrders);
 router.put("/:id", ClerkExpressRequireAuth(), updateOrderStatus);
+// router.put("/verify/:sessionId", ClerkExpressRequireAuth(), verifyPayment);
+
 
 module.exports = router;
 
 
 
-// =========================
-router.post("/test", (req, res) => {
-  console.log("✅ Test route reached");
-  res.json({ success: true });
-});
+// // =========================
+// router.post("/test", (req, res) => {
+//   console.log("✅ Test route reached");
+//   res.json({ success: true });
+// });
 
 module.exports = router;

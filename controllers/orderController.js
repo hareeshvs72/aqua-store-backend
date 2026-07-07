@@ -8,6 +8,8 @@ require("dotenv").config();
 // 🔹 CREATE ORDER
 // --------------------------------------------------
 const createOrder = async (req, res) => {
+  console.log("inside createOrder");
+  
   try {
     console.log("🔹 Incoming Order Payload:", req.body);
 
@@ -113,9 +115,9 @@ const createOrder = async (req, res) => {
         mode: "payment",
         line_items: lineItems,
 
-        success_url: `${frontendUrl}/orders?payment=success&session_id={CHECKOUT_SESSION_ID}`,
+        success_url: `${frontendUrl}/payment-success`,
 
-        cancel_url: `${frontendUrl}/cart?payment=cancel`,
+        cancel_url: `${frontendUrl}/payment-cancell`,
 
         metadata: {
           pendingOrderId: pendingOrder._id.toString(),
@@ -253,10 +255,40 @@ const updateOrderStatus = async (req, res) => {
   }
 };
 
+
+// const verifyPayment = async (req, res) => {
+//   try {
+//     const session = await stripe.checkout.sessions.retrieve(
+//       req.params.sessionId
+//     );
+
+//     if (session.payment_status !== "paid") {
+//       return res.json({
+//         success: false,
+//       });
+//     }
+
+//     const order = await Order.findOne({
+//       paymentIntentId: session.payment_intent,
+//     });
+
+//     return res.json({
+//       success: true,
+//       order,
+//     });
+//   } catch (err) {
+//     return res.status(500).json({
+//       success: false,
+//       message: err.message,
+//     });
+//   }
+// };
+
 module.exports = {
   createOrder,
   getAllOrders,
   getMyOrders,
   getOrderById,
   updateOrderStatus,
+  // verifyPayment
 };
