@@ -17,8 +17,10 @@ const createProduct = async (req, res) => {
       const result = await cloudinary.uploader.upload(file.path, {
         folder: "aqua_store_products"
       });
-
+    
       imageUrls.push(result.secure_url);
+      console.log(result.secure_url);
+      
     }
 
     const product = new Product({

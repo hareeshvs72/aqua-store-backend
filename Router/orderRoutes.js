@@ -41,7 +41,7 @@ router.get("/my", ClerkExpressRequireAuth(), getMyOrders);
 router.get("/:id", ClerkExpressRequireAuth(), getOrderById);
 
 // Admin routes
-router.get("/", ClerkExpressRequireAuth(), getAllOrders);
+router.get("/", getAllOrders);
 router.put("/:id", ClerkExpressRequireAuth(), updateOrderStatus);
 // router.put("/verify/:sessionId", ClerkExpressRequireAuth(), verifyPayment);
 

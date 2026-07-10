@@ -149,11 +149,14 @@ const createOrder = async (req, res) => {
 // 🔹 GET ALL ORDERS (Admin)
 // --------------------------------------------------
 const getAllOrders = async (req, res) => {
+  console.log("inside getAllOrders");
+  
   try {
     const orders = await Order.find()
       .populate("items.product")
       .sort({ createdAt: -1 });
-
+    console.log(orders);
+    
     res.status(200).json({
       success: true,
       total: orders.length,
