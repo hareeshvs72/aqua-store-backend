@@ -7,6 +7,10 @@ const userSchema = new mongoose.Schema(
       required: true,
       unique: true, // important
     },
+    lastActive: {
+      type: Date,
+      default: Date.now,
+    },
 
     name: {
       type: String,

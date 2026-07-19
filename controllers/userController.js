@@ -130,26 +130,69 @@ const updateUserProfile = async (req, res) => {
 };
 
 // --------------------------------------------------
-// 🔹 GET ALL USERS (Admin Only)
+// 🔹 GET USER ANALYTICS (Admin Only)
 // --------------------------------------------------
-const getAllUsers = async (req, res) => {
+const getUserAnalytics = async (req, res) => {
+   console.log("inside get user analystics");
+   
   try {
-    const clerkId = req.auth.userId;
-    const requestUser = await User.findOne({ clerkId });
-    if (!requestUser || requestUser.role !== 'admin') {
-      return res.status(403).json({ success: false, message: "Forbidden: Admins only" });
+    const auth = getAuth(req);
+    // console.log(auth);
+    const {userId} = auth
+
+    const clerkId = userId
+  console.log(clerkId , "clerk");
+  
+    // Verify admin
+const admin = await User.find({
+  clerkId: { $ne: clerkId },
+});    
+ console.log("admin" , admin);
+ 
+    if (!admin) {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden: Admins only",
+      });
     }
 
-    const users = await User.find().sort({ createdAt: -1 });
+    // Start of current week (Monday)
+    const today = new Date();
+    const day = today.getDay();
+    const diff = day === 0 ? 6 : day - 1;
 
-    return res.status(200).json({
-      success: true,
-      total: users.length,
-      data: users,
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - diff);
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    // Total users (excluding logged-in admin)
+    const totalUsers = await User.countDocuments({
+      clerkId: { $ne: clerkId },
     });
 
+    // New registrations this week
+    const newRegistrations = await User.countDocuments({
+      clerkId: { $ne: clerkId },
+      createdAt: { $gte: startOfWeek },
+    });
+
+    // Active users this week
+    const activeUsers = await User.countDocuments({
+      clerkId: { $ne: clerkId },
+      lastActive: { $gte: startOfWeek },
+    });
+
+    res.status(200).json({
+      success: true,
+      data: {
+        totalUsers,
+        newRegistrations,
+        activeUsers,
+        users:admin
+      },
+    });
   } catch (error) {
-    return res.status(500).json({
+    res.status(500).json({
       success: false,
       message: error.message,
     });
@@ -193,6 +236,6 @@ module.exports = {
   syncUser,
   getCurrentUser,
   updateUserProfile,
-  getAllUsers,
+  getUserAnalytics,
   updateUserRole,
 };
