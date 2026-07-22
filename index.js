@@ -9,7 +9,7 @@ const userRoutes = require("./Router/userRoutes");
 const productRoutes = require("./Router/productRoutes");
 const orderRoutes = require("./Router/orderRoutes");
 const CartRoutes = require("./Router/CartRoutes");
-
+const dashboardRoutes = require("./Router/dashboardRoutes");
 connectDB();
 
 
@@ -37,7 +37,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/cart", CartRoutes);
-
+app.use("/api/dashboard", dashboardRoutes);
 app.use((err, req, res, next) => {
   console.error("🔥 Clerk Error:", err);
   res.status(401).json({ error: err.message });
