@@ -1,30 +1,10 @@
-// const express = require("express");
-// const router = express.Router();
-// const { ClerkExpressRequireAuth } = require("@clerk/clerk-sdk-node");
 
-// const {
-//   createOrder,
-//   getAllOrders,
-//   getMyOrders,
-//   getOrderById,
-//   updateOrderStatus,
-// } = require("../controllers/orderController");
-
-// // User routes
-// router.post("/", ClerkExpressRequireAuth(), createOrder);
-// router.get("/my", ClerkExpressRequireAuth(), getMyOrders);
-// router.get("/:id", ClerkExpressRequireAuth(), getOrderById);
-
-// // Admin routes
-// router.get("/", ClerkExpressRequireAuth(), getAllOrders);
-// router.put("/:id", ClerkExpressRequireAuth(), updateOrderStatus);
-
-// module.exports = router;
 
 
 const express = require("express");
 const router = express.Router();
 const { ClerkExpressRequireAuth } = require("@clerk/clerk-sdk-node");
+const isAdmin = require("../middleware/auth");
 
 const {
   createOrder,
@@ -41,8 +21,8 @@ router.get("/my", ClerkExpressRequireAuth(), getMyOrders);
 router.get("/:id", ClerkExpressRequireAuth(), getOrderById);
 
 // Admin routes
-router.get("/", getAllOrders);
-router.put("/:id", ClerkExpressRequireAuth(), updateOrderStatus);
+router.get("/",isAdmin,getAllOrders);
+router.put("/:id", isAdmin, updateOrderStatus);
 // router.put("/verify/:sessionId", ClerkExpressRequireAuth(), verifyPayment);
 
 

@@ -11,6 +11,7 @@ const {
   getAllProductsAdmin
 } = require("../controllers/productController");
 const upload = require("../middleware/multer");
+const isAdmin = require("../middleware/auth");
 // Public
 router.get("/", getAllProducts);
 router.get("/:id", getProductById);
@@ -19,5 +20,5 @@ router.get("/:id", getProductById);
 router.post("/", ClerkExpressRequireAuth(),upload.array("images"), createProduct);
 router.put("/:id", ClerkExpressRequireAuth(),upload.array("images"), updateProduct);
 router.delete("/:id", ClerkExpressRequireAuth(), deleteProduct);
-router.get("/admin/products", ClerkExpressRequireAuth(), getAllProductsAdmin);
+router.get("/admin/products", isAdmin, getAllProductsAdmin);
 module.exports = router;
